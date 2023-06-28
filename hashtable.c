@@ -113,7 +113,9 @@ void file_read_ht()
         name = strtok(word, ",");
         ////begin
         //加入散列表，2条语句实现
-
+        unsigned long key =hashstring(name);
+        wp=walloc(name);
+        Insert(wp,key,name);
         ////end
  
         count++;
