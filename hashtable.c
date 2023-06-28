@@ -136,8 +136,18 @@ void file_write_ht()
     }
 
     ////begin
-
-
+    if(fp==NULL)
+        return;
+    for(int i=0;i<MAX_BUCKETS;i++)
+    {
+        Node*p=table[i];
+        while(p!=NULL)
+        {
+            fprintf(fp,"%s,%d\n",p->data.name,p->data.totalcount);
+            p=p->next;
+            count ++;
+        }
+    }
     ////end
     printf("%d\n", count);   
 }
