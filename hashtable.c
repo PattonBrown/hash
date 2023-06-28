@@ -166,7 +166,7 @@ void search_ht()
 
         ////begin
         for(curr=wp;curr!=NULL;curr=curr->next)
-    {
+ {
         if(strcmp(curr->data.name,name)==0)
         {
             printf("%s,%d\n",curr->data.name,curr->data.totalcount);
