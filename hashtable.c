@@ -7,17 +7,17 @@
 #define MULTIPLIER 31
 
 #define LENGTH 30
-typedef struct User_login{
-   char name[LENGTH];  
-   int totalcount;
-}ELementType;                 //链表的节点
+typedef struct User_login
+{
+    char name[LENGTH];
+    int totalcount;
+} ELementType; // 链表的节点
 
 typedef struct SListNode
 {
- ELementType data;
- struct SListNode* next;
-}Node, *PNode, *List;              //封装链表节点和next指针
-
+    ELementType data;
+    struct SListNode *next;
+} Node, *PNode, *List; // 封装链表节点和next指针
 
 static PNode table[MAX_BUCKETS];
 
@@ -25,13 +25,14 @@ static unsigned long hashstring(const char *str);
 static void cleartable();
 static PNode walloc(const char *str);
 static PNode lookup(const char *str);
-static PNode find(PNode wp , const char *str);
+static PNode find(PNode wp, const char *str);
 
 /*创建一个节点*/
 static PNode walloc(const char *str)
 {
     PNode p = (PNode)malloc(sizeof(Node));
-    if (p != NULL) {
+    if (p != NULL)
+    {
         strcpy(p->data.name, str);
         p->data.totalcount = 0;
         p->next = NULL;
@@ -52,46 +53,44 @@ static unsigned long hashstring(const char *str)
 }
 
 /*在一个链表中查找人名，找到返回指针，找不到返回NULL*/
-static PNode find(PNode wp , const char *str)
+static PNode find(PNode wp, const char *str)
 {
-    wp=table[hashstring(str)];
-    while (wp)
+    while (wp != NULL)
     {
-        if(strcmp(wp->data.name,str)==0)
-        return wp;
-        wp=wp->next;
+        if (strcmp(wp->data.name, str) == 0)
+            return wp;
+        wp = wp->next;
     }
     return NULL;
-
 }
-/*在散列表中插入相应节点*/
-void Insert(PNode wp,unsigned long key,const char*name)
-{
-    Node *p;
-    p=find(wp,name);
-    if(p!=NULL)
-    p->data.totalcount++;
-    else{
-        Node *q=wp;
-        q->next=table[key];
-        table[key]=q;
-    }
-}
-
 
 /*将在散列表中查找相应节点，并进行相应操作，找到返回指针，没找到则创建节点并加入散列表,并返回指针*/
 static PNode lookup(const char *str)
 {
-    unsigned long h=hashstring(str);
-    PNode p =NULL,wp=table[h];
-    for(p =wp;p!=NULL;p=p->next)
-    {
-        if(strcmp(p->data.name,str)==0)
-        return p;
-    }
-    p=walloc(str);
-    return p;
+    unsigned long hash = hashstring(str);
+    PNode  wp = table[hash];
 
+    if (wp == NULL)
+    {
+        wp = walloc(str);
+        table[hash] = wp;
+    }
+    else
+    {
+        PNode existingNode = find(wp, str);
+        if (existingNode != NULL)
+        {
+            return existingNode;
+        }
+        else
+        {
+            PNode newNode = walloc(str);
+            newNode->next = wp;
+            table[hash] = newNode;
+            wp = newNode;
+        }
+    }
+    return wp;
 }
 
 /*删除散列表*/
@@ -100,13 +99,16 @@ static void cleartable()
     PNode wp = NULL, p = NULL;
     int i = 0;
 
-    for (i = 0; i < MAX_BUCKETS; i++) {
+    for (i = 0; i < MAX_BUCKETS; i++)
+    {
         wp = table[i];
-        while (wp) {
+        while (wp)
+        {
             p = wp;
             wp = wp->next;
             free(p);
         }
+        table[i] = NULL;
     }
 }
 
@@ -121,17 +123,23 @@ void file_read_ht()
     memset(table, 0, sizeof(table));
 
     int count = 0;
-    while (1) {
+    if (fp == NULL)
+    {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    while (1)
+    {
         if (fscanf(fp, "%s", word) != 1)
             break;
         name = strtok(word, ",");
         ////begin
-        //加入散列表，2条语句实现
-        unsigned long key =hashstring(name);
-        wp=walloc(name);
-        Insert(wp,key,name);
+        // 加入散列表，2条语句实现
+        wp = lookup(name);
+        wp->data.totalcount++;
         ////end
- 
+
         count++;
     }
     printf("%d \n", count);
@@ -144,62 +152,58 @@ void file_write_ht()
     FILE *fp;
     int count = 0;
 
-    if((fp=fopen("output.txt","wt")) == NULL ) {
-        printf("Fail to open file!\n");    
-        exit(0);  
+    if ((fp = fopen("output.txt", "wt")) == NULL)
+    {
+        printf("Fail to open file!\n");
+        exit(0);
     }
 
-    ////begin
-    if(fp==NULL)
-        return;
-    for(int i=0;i<MAX_BUCKETS;i++)
+    ////begin 
+    for (int i = 0; i < MAX_BUCKETS; i++)
     {
-        Node*p=table[i];
-        while(p!=NULL)
+        PNode wp = table[i];
+        while (wp)
         {
-            fprintf(fp,"%s,%d\n",p->data.name,p->data.totalcount);
-            p=p->next;
-            count ++;
+            fprintf(fp, "%s,%d\n", wp->data.name, wp->data.totalcount);
+            wp = wp->next;
+            count++;
         }
     }
+    fclose(fp);
     ////end
-    printf("%d\n", count);   
+    printf("%d\n", count);
 }
 
 /*搜索功能*/
 void search_ht()
 {
-    char name[LENGTH]; 
+    char name[LENGTH];
     printf("Enter name, 'q' to exit：\n");
-    scanf("%s", name);    
-    int flag=0;
-    while (strcmp(name, "q")) {
+    scanf("%s", name);
+    int flag = 0;
+    while (strcmp(name, "q"))
+    {
         unsigned long hash = hashstring(name);
         PNode wp = table[hash];
         PNode curr = NULL;
 
         ////begin
-        for(curr=wp;curr!=NULL;curr=curr->next)
- {
-        if(strcmp(curr->data.name,name)==0)
+        for (curr = wp; curr != NULL; curr = curr->next)
         {
-            printf("%s,%d\n",curr->data.name,curr->data.totalcount);
-            flag=1;
-            break;
+            if (strcmp(curr->data.name, name) == 0)
+            {
+                printf("%s,%d\n", curr->data.name, curr->data.totalcount);
+                flag = 1;
+                break;
+            }
         }
-    }
-    if(flag==0)
-    printf("NULL\n");
-
+        if (flag == 0)
+            printf("NULL\n");
 
         ////end
 
         scanf("%s", name);
-    }    
+    }
 
-    cleartable();     
+    cleartable();
 }
-
-
-
-
