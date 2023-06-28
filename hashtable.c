@@ -158,13 +158,24 @@ void search_ht()
     char name[LENGTH]; 
     printf("Enter name, 'q' to exit：\n");
     scanf("%s", name);    
-     
+    int flag=0;
     while (strcmp(name, "q")) {
         unsigned long hash = hashstring(name);
         PNode wp = table[hash];
         PNode curr = NULL;
 
         ////begin
+        for(curr=wp;curr!=NULL;curr=curr->next)
+    {
+        if(strcmp(curr->data.name,name)==0)
+        {
+            printf("%s,%d\n",curr->data.name,curr->data.totalcount);
+            flag=1;
+            break;
+        }
+    }
+    if(flag==0)
+    printf("NULL\n");
 
 
         ////end
