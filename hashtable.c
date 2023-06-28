@@ -64,6 +64,20 @@ static PNode find(PNode wp , const char *str)
     return NULL;
 
 }
+/*在散列表中插入相应节点*/
+void Insert(PNode wp,unsigned long key,const char*name)
+{
+    Node *p;
+    p=find(wp,name);
+    if(p!=NULL)
+    p->data.totalcount++;
+    else{
+        Node *q=wp;
+        q->next=table[key];
+        table[key]=q;
+    }
+}
+
 
 /*将在散列表中查找相应节点，并进行相应操作，找到返回指针，没找到则创建节点并加入散列表,并返回指针*/
 static PNode lookup(const char *str)
